@@ -30,3 +30,23 @@ chatButton.addEventListener('click', () => {
 
   activeChatContainer = !activeChatContainer;
 });
+
+let displayFrame = document.getElementById("stream-box");
+let videoFrames = document.getElementsByClassName("video-container");
+let userIdInDisplayFrame = null;
+
+let expandVideoFrame = (e) => {
+  let child = displayFrame.children[0];
+
+  if(child){
+    document.getElementById("streams-container").appendChild(child);
+  }
+
+  displayFrame.style.display = 'block';
+  displayFrame.appendChild(e.currentTarget);
+  
+}
+
+videoFrames.forEach((videoFrame)=> {
+  videoFrame.addEventListener("click", expandVideoFrame);
+})
