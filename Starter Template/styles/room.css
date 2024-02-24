@@ -169,7 +169,6 @@
   width: calc(100% - 40.7rem);
   position: fixed;
   left: 15.7rem;
-  top: clac(100vh - 72px);
   overflow-y: auto;
   height: 100%;
 }
@@ -182,6 +181,14 @@
 
 #stream-box .video-container{
   border : 2px solid #000;
+  border-radius : 0;
+  width : 100%!important;
+  height : 100%!important;
+  background-size: 300px;
+}
+
+#stream-box video{
+  border-radius: 0;
 }
 
 #streams-container{
@@ -204,6 +211,11 @@
   overflow: hidden;
   height: 300px;
   width: 300px;
+
+  background-image : url('../images/logo.png');
+  background-repeat : no-repeat;
+  background-position : center;
+  background-size : 75px;
 }
 
 .video-player{
