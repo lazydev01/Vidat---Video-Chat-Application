@@ -180,6 +180,10 @@
   display: none;
 }
 
+#stream-box .video-container{
+  border : 2px solid #000;
+}
+
 #streams-container{
   display: flex;
   flex-wrap: wrap;

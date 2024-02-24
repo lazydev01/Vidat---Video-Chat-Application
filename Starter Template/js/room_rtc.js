@@ -33,6 +33,33 @@ let joinRoomInit = async() => {
     joinStream();
 }
 
+
+
+
+let displayFrame = document.getElementById("stream-box");
+let videoFrames = document.getElementsByClassName("video-container");
+let userIdInDisplayFrame = null;
+let expandVideoFrame = (e) => {
+    let child = displayFrame.children[0];
+  
+    if(child){
+      document.getElementById("streams-container").appendChild(child);
+    }
+  
+    displayFrame.style.display = 'block';
+    displayFrame.appendChild(e.currentTarget);
+    userIdInDisplayFrame = e.currentTarget.id;
+  
+    console.log(videoFrames);
+  
+    for(let i=0; i<videoFrames.length; i++){
+      if(videoFrames[i].id !== userIdInDisplayFrame){
+        videoFrames[i].style.height = '100px';
+        videoFrames[i].style.width = '100px';
+      }
+    }
+  }
+
 let joinStream = async() => {
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracks();
     let player = `<div class="video-container" id="user-container-${uid}">
@@ -42,11 +69,13 @@ let joinStream = async() => {
     document.getElementById("streams-container").insertAdjacentHTML('beforeend', player);
 
     localTracks[1].play(`user-${uid}`);
+    document.getElementById(`user-container-${uid}`).addEventListener('click', expandVideoFrame);
 
     await client.publish([localTracks[0], localTracks[1]])
 }
 
 let handleUserPublished = async(user, mediaType) => {
+    console.log("new user published");
     remoteUsers[user.uid] = user;
     await client.subscribe(user, mediaType);
 
@@ -58,6 +87,7 @@ let handleUserPublished = async(user, mediaType) => {
                 </div>`;
 
         document.getElementById("streams-container").insertAdjacentHTML('beforeend', player);
+        document.getElementById(`user-container-${user.uid}`).addEventListener('click', expandVideoFrame);
     }
 
     
