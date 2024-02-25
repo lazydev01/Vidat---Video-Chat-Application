@@ -1,4 +1,5 @@
 import { AGORA_APP_ID } from "./env.js";
+import {handleMemberJoined, handleMemberLeft} from "./room_rtm.js"
 
 let uid = sessionStorage.getItem("uid");
 if(!uid){
@@ -9,11 +10,21 @@ if(!uid){
 let token = null;
 let client;
 
+//RTM Configuration
+
+let rtmClient;
+let channel;
+
 // Get the roomId;
 
 let queryString = window.location.search;
 let urlParams = new URLSearchParams(queryString);
-let roomId = urlParams.get("roomId");
+let roomId = urlParams.get("room");
+
+let displayName = sessionStorage.getItem("display_name");
+if(!displayName){
+    window.location = `lobby.html`;
+}
 
 if(!roomId){
     roomId = "main";
@@ -25,6 +36,16 @@ let localScreenTracks;
 let screenShared = false;
 
 let joinRoomInit = async() => {
+    rtmClient = await AgoraRTM.createInstance(AGORA_APP_ID);
+    await rtmClient.login({uid, token});
+
+    channel = await rtmClient.createChannel(roomId);
+    await channel.join();
+
+    channel.on('MemberJoined', handleMemberJoined)
+    channel.on('MemberLeft', handleMemberLeft)
+
+
     client = AgoraRTC.createClient({"mode" : "rtc", "codec" : "vp8"});
     await client.join(AGORA_APP_ID, roomId, token, uid);
 
