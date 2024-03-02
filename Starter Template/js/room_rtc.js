@@ -39,11 +39,15 @@ let joinRoomInit = async() => {
     rtmClient = await AgoraRTM.createInstance(AGORA_APP_ID);
     await rtmClient.login({uid, token});
 
+    await rtmClient.addOrUpdateLocalUserAttributes({"name" : displayName});
+
     channel = await rtmClient.createChannel(roomId);
     await channel.join();
 
     channel.on('MemberJoined', handleMemberJoined)
     channel.on('MemberLeft', handleMemberLeft)
+
+    getMembers();
 
 
     client = AgoraRTC.createClient({"mode" : "rtc", "codec" : "vp8"});
@@ -235,6 +239,33 @@ let toggleScreen = async (e) => {
         switchToCamera();
     }
 }
+
+let leaveChannel = async() => {
+    await channel.leave();
+    await rtmClient.logout();
+}
+
+export const updateMemberCount = async() => {
+    let members = await channel.getMembers();
+
+    let count = document.getElementById("members__count");
+    count.innerHTML = members.length;
+}
+
+let getMembers = async() => {
+    let members = await channel.getMembers();
+    updateMemberCount();
+    for(let i=0; i<members.length; i++){
+        handleMemberJoined(members[i]);
+    }
+}
+
+export const getDisplayNameOfUserByMemberId = async (MemberId) => {
+    let {name} = await rtmClient.getUserAttributesByKeys(MemberId, ['name']);
+    return name;
+}
+
+window.addEventListener('beforeunload', leaveChannel);
 
 document.getElementById('camera-btn').addEventListener("click", toggleControls);
 document.getElementById('mic-btn').addEventListener("click", toggleControls);
