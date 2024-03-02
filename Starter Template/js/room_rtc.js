@@ -1,5 +1,5 @@
 import { AGORA_APP_ID } from "./env.js";
-import {handleMemberJoined, handleMemberLeft} from "./room_rtm.js"
+import {addBotMessageToDom, addMessageToDom, handleMemberJoined, handleMemberLeft} from "./room_rtm.js"
 
 let uid = sessionStorage.getItem("uid");
 if(!uid){
@@ -38,16 +38,19 @@ let screenShared = false;
 let joinRoomInit = async() => {
     rtmClient = await AgoraRTM.createInstance(AGORA_APP_ID);
     await rtmClient.login({uid, token});
-
+    
     await rtmClient.addOrUpdateLocalUserAttributes({"name" : displayName});
-
+    
     channel = await rtmClient.createChannel(roomId);
     await channel.join();
-
-    channel.on('MemberJoined', handleMemberJoined)
-    channel.on('MemberLeft', handleMemberLeft)
-
+    
+    channel.on('MemberJoined', handleMemberJoined);
+    channel.on('MemberLeft', handleMemberLeft);
+    channel.on("ChannelMessage", handleChannelMessage);
+    
     getMembers();
+    addBotMessageToDom(`Welcome to the room ${displayName}! 👋`);
+
 
 
     client = AgoraRTC.createClient({"mode" : "rtc", "codec" : "vp8"});
@@ -60,6 +63,14 @@ let joinRoomInit = async() => {
     joinStream();
 }
 
+let handleChannelMessage = async(messageData, MemberId) => {
+    console.log("A new message was received");
+    let data = JSON.parse(messageData.text);
+    console.log("Message : ", data);
+    if(data.type==='chat'){
+        addMessageToDom(data.displayName, data.message);
+    }
+}
 
 
 
@@ -265,9 +276,20 @@ export const getDisplayNameOfUserByMemberId = async (MemberId) => {
     return name;
 }
 
+let sendMessage = async(e) => {
+    e.preventDefault();
+    let message = e.target.message.value;
+    await channel.sendMessage({text : JSON.stringify({'type' : 'chat', 'message' : message, 'displayName' : displayName})});
+    e.target.reset();
+    addMessageToDom(displayName, message);
+}
+
 window.addEventListener('beforeunload', leaveChannel);
 
 document.getElementById('camera-btn').addEventListener("click", toggleControls);
 document.getElementById('mic-btn').addEventListener("click", toggleControls);
 document.getElementById('stream-btn').addEventListener("click", toggleScreen);
 joinRoomInit();
+
+let messageForm = document.getElementById('message__form');
+messageForm.addEventListener("submit", sendMessage);
