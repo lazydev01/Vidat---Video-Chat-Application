@@ -59,8 +59,6 @@ let joinRoomInit = async() => {
     client.on("user-published", handleUserPublished);
 
     client.on("user-left", handleUserLeft);
-
-    joinStream();
 }
 
 let handleChannelMessage = async(messageData, MemberId) => {
@@ -97,6 +95,9 @@ let expandVideoFrame = (e) => {
   }
 
 let joinStream = async() => {
+    document.getElementById("join-btn").style.display = "none";
+    document.getElementsByClassName("stream__actions")[0].style.display = "flex";
+
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracks({}, {encoderConfig : {
         width : {min : 640, ideal : 1920, max : 1920},
         height : {min : 480, ideal : 1080, max : 1080}
@@ -284,11 +285,41 @@ let sendMessage = async(e) => {
     addMessageToDom(displayName, message);
 }
 
+let leaveStream = async (e) => {
+    e.preventDefault();
+    document.getElementById("join-btn").style.display = "block";
+    document.getElementsByClassName("stream__actions")[0].style.display = "none";
+
+    for(let i=0; i<localTracks.length; i++){
+        localTracks[i].stop();
+        localTracks[i].close();
+    }
+
+    await client.unpublish([localTracks[0], localTracks[1]]);
+    if(localScreenTracks){
+        await client.unpublish([localScreenTracks]);
+    }
+
+    document.getElementById(`user-container-${uid}`).remove();
+
+    if(userIdInDisplayFrame === `user-container-${uid}`){
+        displayFrame.style.display = "none";
+        for(let i=0; i<videoFrames.length; i++){
+            videoFrames[i].style.width = "300px";
+            videoFrames[i].style.height = "300px";
+        }
+    }
+
+    channel.sendMessage({text : JSON.stringify({'type' : 'user_left', 'uid' : uid})});
+}
+
 window.addEventListener('beforeunload', leaveChannel);
 
 document.getElementById('camera-btn').addEventListener("click", toggleControls);
 document.getElementById('mic-btn').addEventListener("click", toggleControls);
 document.getElementById('stream-btn').addEventListener("click", toggleScreen);
+document.getElementById('join-btn').addEventListener("click", joinStream);
+document.getElementById('leave-btn').addEventListener("click", leaveStream);
 joinRoomInit();
 
 let messageForm = document.getElementById('message__form');
