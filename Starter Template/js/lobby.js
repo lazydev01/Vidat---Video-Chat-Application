@@ -2,7 +2,6 @@ let room = document.getElementById('lobby__form');
 
 let displayName = sessionStorage.getItem('display_name');
 if(displayName){
-    console.log(room)
     room.name.value = displayName;
 }
 

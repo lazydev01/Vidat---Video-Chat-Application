@@ -63,7 +63,6 @@ let joinRoomInit = async() => {
 
 let handleChannelMessage = async(messageData, MemberId) => {
     let data = JSON.parse(messageData.text);
-    console.log("Message : ", data);
     if(data.type==='chat'){
         addMessageToDom(data.displayName, data.message);
     }

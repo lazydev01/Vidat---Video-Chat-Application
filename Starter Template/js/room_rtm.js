@@ -54,7 +54,6 @@ let addBotMessageToDom = async(botMessage) => {
 
 
 let handleMemberLeft = async(MemberId) => {
-    console.log(MemberId)
     removeMemberFromDom(MemberId);
     updateMemberCount();
     

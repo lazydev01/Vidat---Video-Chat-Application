@@ -46,7 +46,6 @@ let expandVideoFrame = (e) => {
   displayFrame.appendChild(e.currentTarget);
   userIdInDisplayFrame = e.currentTarget.id;
 
-  console.log(videoFrames);
 
   for(let i=0; i<videoFrames.length; i++){
     if(videoFrames[i].id !== userIdInDisplayFrame){
