@@ -62,11 +62,26 @@ let joinRoomInit = async() => {
 }
 
 let handleChannelMessage = async(messageData, MemberId) => {
-    console.log("A new message was received");
     let data = JSON.parse(messageData.text);
     console.log("Message : ", data);
     if(data.type==='chat'){
         addMessageToDom(data.displayName, data.message);
+    }
+
+    if(data.type==='user_left'){
+        document.getElementById(`user-container-${data.uid}`).remove();
+
+        if(userIdInDisplayFrame === `user-container-${user.uid}`){
+            displayFrame.style.display = null;
+    
+            let videoFrames = document.getElementsByClassName(`video-container`);
+    
+            for(let i=0; i<videoFrames.length; i++){
+                videoFrames[i].style.width = `300px`;
+                videoFrames[i].style.height = `300px`;
+            }
+        }
+        
     }
 }
 
@@ -161,7 +176,11 @@ let handleUserLeft = async(user) => {
         }
     }
     delete remoteUsers[user.uid];
-    document.getElementById(`user-container-${user.uid}`).remove();
+    let item = document.getElementById(`user-container-${user.uid}`);
+    if(item){
+        item.remove();
+    }
+    
 }
 
 let hideDisplayFrame = () => {
